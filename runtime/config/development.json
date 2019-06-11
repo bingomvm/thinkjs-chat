@@ -1,0 +1,96 @@
+{
+  "port": 8400,
+  "workers": 1,
+  "stickyCluster": true,
+  "startServerTimeout": 3000,
+  "reloadSignal": "SIGUSR2",
+  "processKillTimeout": 10000,
+  "jsonpCallbackField": "callback",
+  "jsonContentType": "application/json",
+  "jsonpContentType": "application/javascript",
+  "errnoField": "errno",
+  "errmsgField": "errmsg",
+  "defaultErrno": 1000,
+  "validateDefaultErrno": 1001,
+  "redis": {
+    "host": "127.0.0.1",
+    "port": "6379"
+  },
+  "cache": {
+    "type": "file",
+    "file": {
+      "timeout": 86400000,
+      "cachePath": "/Users/liguangzhao/Documents/myProject/thinkjs-chat/runtime/cache",
+      "pathDepth": 1,
+      "gcInterval": 86400000
+    }
+  },
+  "model": {
+    "type": "mysql",
+    "mysql": {
+      "logConnect": true,
+      "logSql": true,
+      "database": "",
+      "prefix": "think_",
+      "encoding": "utf8",
+      "host": "127.0.0.1",
+      "port": "",
+      "user": "root",
+      "password": "root",
+      "dateStrings": true
+    }
+  },
+  "session": {
+    "type": "redis",
+    "redis": {
+      "cookie": {
+        "name": "thinkjs"
+      },
+      "maxAge": "1d",
+      "host": "127.0.0.1",
+      "port": "6379"
+    }
+  },
+  "view": {
+    "type": "nunjucks",
+    "nunjucks": {
+      "viewPath": "/Users/liguangzhao/Documents/myProject/thinkjs-chat/view",
+      "sep": "_",
+      "extname": ".html",
+      "options": {
+        "tags": {
+          "variableStart": "{=",
+          "variableEnd": "=}"
+        }
+      }
+    }
+  },
+  "logger": {
+    "type": "console",
+    "console": {},
+    "file": {
+      "backups": 10,
+      "absolute": true,
+      "maxLogSize": 51200,
+      "filename": "/Users/liguangzhao/Documents/myProject/thinkjs-chat/logs/app.log"
+    },
+    "dateFile": {
+      "level": "ALL",
+      "absolute": true,
+      "pattern": "-yyyy-MM-dd",
+      "alwaysIncludePattern": true,
+      "filename": "/Users/liguangzhao/Documents/myProject/thinkjs-chat/logs/app.log"
+    }
+  },
+  "websocket": {
+    "type": "socketio",
+    "socketio": {
+      "messages": {
+        "open": "/websocket/open",
+        "close": "/websocket/close",
+        "message": "/websocket/message",
+        "room": "/websocket/room"
+      }
+    }
+  }
+}
