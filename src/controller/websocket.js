@@ -1,10 +1,8 @@
-const ni = require('network-interfaces');
 const request = require('request-promise');
 let host = '';
-let hostCount = 1;
 /**
    *
-   * this.socket为当前连接的socket实例，this.io.sockets.connected：当前所有连接的sockets，格式为：{socket_id: {socket实例}}。
+   * this.socket 为发送消息的客户端对应的 socket 实例， this.io 为Socket.io 的一个实例
    */
 module.exports = class extends think.Controller {
   constructor(...arg) {
@@ -12,6 +10,7 @@ module.exports = class extends think.Controller {
     this.io = this.ctx.req.io;
     this.socket = this.ctx.req.websocket;
     global.$socketChat.io = this.io;
+    // demo只是实现了本地服务两个端口的通信，正常情况请使用 network-interfaces 等库来获取ip
     if (this.header('host')) {
       host = this.header('host');
     }
@@ -28,8 +27,8 @@ module.exports = class extends think.Controller {
 
   async openAction() {
     host = this.header('host');
-    await global.rediser.hset(`-socket-chat`, host, hostCount++);
-    this.socket.emit('open', 'hi friend')
+    await global.rediser.hset(`-socket-chat`, host, 1);
+    this.socket.emit('open', 'connect success')
   }
   
   async messageAction() {
@@ -56,7 +55,9 @@ module.exports = class extends think.Controller {
   }
   
   async closeAction() {
-    const nickname = global.$socketChat[this.socket.id] && global.$socketChat[this.socket.id].nickname;
+    const connectSocketCount = Object.keys(this.io.sockets.connected).length;
+    const closeSocket = global.$socketChat[this.socket.id];
+    const nickname = closeSocket && closeSocket.nickname;
     const data = {
       nickname,
       type: 'out',
@@ -66,16 +67,13 @@ module.exports = class extends think.Controller {
     this.socket.removeAllListeners();
     this.emit('room', data);
     delete global.$socketChat[this.socket.id];
-    if (hostCount > 1) {
-      hostCount--;
-    } else {
+    if (!connectSocketCount) {
       await global.rediser.hdel('-socket-chat', host);
     }
   }
   async crossSync(action, params) {
-    const ips = await global.rediser.hkeys('-socket-chat');
+    const ips = (await global.rediser.hkeys('-socket-chat')).filter(ip => ip !== host);
     ips.forEach(ip => {
-      if (host === ip) return;
       request({
         method: 'POST',
         uri: `http://${ip}/api/websocket/sync`,
